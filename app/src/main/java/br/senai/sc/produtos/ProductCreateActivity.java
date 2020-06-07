@@ -6,15 +6,12 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.Toast;
 
+import br.senai.sc.produtos.database.ProductDAO;
 import br.senai.sc.produtos.models.Product;
 
 public class ProductCreateActivity extends AppCompatActivity {
-
-    private final int RESULT_CODE_CREATE_PRODUCT = 10;
-    private final int RESULT_CODE_EDIT_PRODUCT = 20;
-    private final int RESULT_CODE_DELETE_PRODUCT = 30;
-    private boolean editing = false;
     private int id = 0;
 
     @Override
@@ -33,7 +30,6 @@ public class ProductCreateActivity extends AppCompatActivity {
             EditText editTextValue = findViewById(R.id.editText_value);
             editTextName.setText(product.getName());
             editTextValue.setText(String.valueOf(product.getValue()));
-            editing = true;
             id = product.getId();
         }
     }
@@ -48,15 +44,15 @@ public class ProductCreateActivity extends AppCompatActivity {
         Float value = Float.parseFloat(editTextValue.getText().toString());
 
         Product product = new Product(id, name, value);
-        Intent intent = new Intent();
-        if (editing) {
-            intent.putExtra("editProduct", product);
-            setResult(RESULT_CODE_EDIT_PRODUCT, intent);
-        }
-        else {
-            intent.putExtra("createProduct", product);
-            setResult(RESULT_CODE_CREATE_PRODUCT, intent);
-        }
+            ProductDAO productDAO = new ProductDAO(getBaseContext());
+            boolean saved = productDAO.save(product);
+            if (saved) {
+                finish();
+            }
+            else {
+                Toast.makeText(ProductCreateActivity.this, "Erro ao salvar ", Toast.LENGTH_SHORT).show();
+            }
+
         finish();
     }
     public void onClickDeleteProduct(View v) {
@@ -67,10 +63,14 @@ public class ProductCreateActivity extends AppCompatActivity {
         Float value = Float.parseFloat(editTextValue.getText().toString());
 
         Product product = new Product(id, name, value);
-        Intent intent = new Intent();
-        if (editing) {
-            intent.putExtra("deleteProduct", product);
-            setResult(RESULT_CODE_DELETE_PRODUCT, intent);
+        ProductDAO productDAO = new ProductDAO(getBaseContext());
+        int deleted = productDAO.delete(product);
+        if (deleted>0){
+            Toast.makeText(ProductCreateActivity.this, "Excluido " + deleted + " produto(s) com sucesso", Toast.LENGTH_SHORT).show();
+            finish();
+        }
+        else {
+            Toast.makeText(ProductCreateActivity.this, "Erro ao excluir produto ", Toast.LENGTH_SHORT).show();
         }
         finish();
     }

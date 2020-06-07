@@ -13,16 +13,17 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 
+import br.senai.sc.produtos.database.ProductDAO;
 import br.senai.sc.produtos.models.Product;
 
 public class MainActivity extends AppCompatActivity {
-
+/*
     private final int REQUEST_CODE_CREATE_PRODUCT = 1;
     private final int RESULT_CODE_CREATE_PRODUCT = 10;
     private final int REQUEST_CODE_EDIT_PRODUCT = 2;
     private final int RESULT_CODE_EDIT_PRODUCT = 20;
     private final int RESULT_CODE_DELETE_PRODUCT = 30;
-
+*/
     private ListView listViewProducts;
     private ArrayAdapter<Product> adapterProducts;
     private int id = 0;
@@ -35,13 +36,18 @@ public class MainActivity extends AppCompatActivity {
 
         listViewProducts = findViewById(R.id.listView_products);
         ArrayList<Product> products = new ArrayList<Product>();
-
-        adapterProducts = new ArrayAdapter<Product>(MainActivity.this, android.R.layout.simple_list_item_1, products);
-
-        listViewProducts.setAdapter(adapterProducts);
-
         defineOnClickListenerListView();
     }
+
+    @Override
+    protected void onResume(){
+        super.onResume();
+        ProductDAO productDAO = new ProductDAO(getBaseContext());
+        adapterProducts = new ArrayAdapter<Product>(MainActivity.this,
+                android.R.layout.simple_list_item_1, productDAO.list());
+        listViewProducts.setAdapter(adapterProducts);
+    }
+
     private void defineOnClickListenerListView(){
         listViewProducts.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -49,7 +55,8 @@ public class MainActivity extends AppCompatActivity {
                 Product productClicked = adapterProducts.getItem(position);
                 Intent intent = new Intent(MainActivity.this, ProductCreateActivity.class);
                 intent.putExtra("editProduct", productClicked );
-                startActivityForResult(intent,REQUEST_CODE_EDIT_PRODUCT);
+                //startActivityForResult(intent,REQUEST_CODE_EDIT_PRODUCT);
+                startActivity(intent);
             }
         });
 
@@ -57,18 +64,12 @@ public class MainActivity extends AppCompatActivity {
 
     public void onClickCreateProduct(View v) {
         Intent intent = new Intent(MainActivity.this, ProductCreateActivity.class);
-        startActivityForResult(intent, REQUEST_CODE_CREATE_PRODUCT);
+        startActivity(intent);
     }
-
+/*
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        if(requestCode==REQUEST_CODE_CREATE_PRODUCT && resultCode==RESULT_CODE_CREATE_PRODUCT){
-            Product product = (Product) data.getExtras().getSerializable("createProduct");
-            product.setId(++id);
-            this.adapterProducts.add(product);
-            Toast.makeText(MainActivity.this,"Item adicionado com sucesso!", Toast.LENGTH_LONG).show();
-        }
-        else if (requestCode==REQUEST_CODE_EDIT_PRODUCT && resultCode==RESULT_CODE_EDIT_PRODUCT){
+        if (requestCode==REQUEST_CODE_EDIT_PRODUCT && resultCode==RESULT_CODE_EDIT_PRODUCT){
             Product editedProduct = (Product) data.getExtras().getSerializable("editProduct");
             for(int i = 0; i < adapterProducts.getCount();i++) {
                 Product product = adapterProducts.getItem(i);
@@ -93,5 +94,5 @@ public class MainActivity extends AppCompatActivity {
 
         }
         super.onActivityResult(requestCode, resultCode, data);
-    }
+    } */
 }
